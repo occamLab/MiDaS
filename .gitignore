@@ -102,6 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+GoogleService-Info.plist
+/mobile/ios/Midas.xcodeproj/project.xcworkspace/xcuserdata/
+/mobile/ios/Midas.xcodeproj/xcuserdata/
+/mobile/ios/Midas.xcworkspace
+/mobile/ios/Pods
+*.DS_store
 
 *.png
 *.pfm

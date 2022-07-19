@@ -139,7 +139,21 @@ class ModelDataHandler {
     let postprocessingTime: TimeInterval
 
     preprocessingStartTime = Date()
-    guard let data = preprocess(of: pixelbuffer, from: source) else {
+      
+    let width = CVPixelBufferGetWidth(pixelbuffer)
+    let height = CVPixelBufferGetHeight(pixelbuffer)
+
+    guard let pixelbufferCropped = resizePixelBuffer(pixelbuffer,
+                                  cropX: (width - height)/2,
+                                  cropY: 0,
+                                  cropWidth: height,
+                                  cropHeight: height,
+                                  scaleWidth: height,
+                                  scaleHeight: height) else {
+        return nil
+    }
+      
+    guard let data = preprocess(of: pixelbufferCropped, from: source) else {
       os_log("Preprocessing failed", type: .error)
       return nil
     }
@@ -193,6 +207,7 @@ class ModelDataHandler {
   /// - Returns: The cropped and resized image. `nil` if it can not be processed.
   private func preprocess(of pixelBuffer: CVPixelBuffer, from targetSquare: CGRect) -> Data? {
     let sourcePixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
+      print(CVPixelBufferGetPixelFormatName(pixelBuffer: pixelBuffer))
     assert(sourcePixelFormat == kCVPixelFormatType_32BGRA)
 
     // Resize `targetSquare` of input image to `modelSize`.

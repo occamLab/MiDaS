@@ -15,6 +15,11 @@
 import AVFoundation
 import UIKit
 import os
+import ARKit
+import FirebaseStorage
+import FirebaseAuth
+import Foundation
+import ARDataLogger
 
 
 public struct PixelData {
@@ -48,9 +53,9 @@ extension UIImage {
 }
 
 
-class ViewController: UIViewController {
-  // MARK: Storyboards Connections
-  @IBOutlet weak var previewView: PreviewView!
+class ViewController: UIViewController, ARSCNViewDelegate {
+    // MARK: Storyboards Connections
+  @IBOutlet weak var previewView: ARSCNView!
 
   //@IBOutlet weak var overlayView: OverlayView!
   @IBOutlet weak var overlayView: UIImageView!
@@ -58,9 +63,6 @@ class ViewController: UIViewController {
   private var imageView : UIImageView = UIImageView(frame:CGRect(x:0, y:0, width:400, height:400))
     
   private var imageViewInitialized: Bool = false
-    
-  @IBOutlet weak var resumeButton: UIButton!
-  @IBOutlet weak var cameraUnavailableLabel: UILabel!
 
   @IBOutlet weak var tableView: UITableView!
 
@@ -68,7 +70,9 @@ class ViewController: UIViewController {
   @IBOutlet weak var threadCountStepper: UIStepper!
 
   @IBOutlet weak var delegatesControl: UISegmentedControl!
-
+  var sentData = false
+  var lastFrameUploadTime = Date()
+  
   // MARK: ModelDataHandler traits
   var threadCount: Int = Constants.defaultThreadCount
   var delegate: Delegates = Constants.defaultDelegate
@@ -89,22 +93,24 @@ class ViewController: UIViewController {
 
   // MARK: Controllers that manage functionality
   // Handles all the camera related functionality
-  private lazy var cameraCapture = CameraFeedManager(previewView: previewView)
+  //private lazy var cameraCapture = CameraFeedManager(previewView: previewView)
 
   // Handles all data preprocessing and makes calls to run inference.
   private var modelDataHandler: ModelDataHandler?
 
+  let configuration = ARWorldTrackingConfiguration()
+    
   // MARK: View Handling Methods
   override func viewDidLoad() {
     super.viewDidLoad()
-
+    setupARSession()
     do {
       modelDataHandler = try ModelDataHandler()
     } catch let error {
       fatalError(error.localizedDescription)
     }
 
-    cameraCapture.delegate = self
+    //cameraCapture.delegate = self
     tableView.delegate = self
     tableView.dataSource = self
 
@@ -140,11 +146,11 @@ class ViewController: UIViewController {
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
 
-    cameraCapture.checkCameraConfigurationAndStartSession()
+    //cameraCapture.checkCameraConfigurationAndStartSession()
   }
 
   override func viewWillDisappear(_ animated: Bool) {
-    cameraCapture.stopSession()
+    //cameraCapture.stopSession()
   }
 
   override func viewDidLayoutSubviews() {
@@ -183,17 +189,31 @@ class ViewController: UIViewController {
   }
 
   @IBAction func didTapResumeButton(_ sender: Any) {
-    cameraCapture.resumeInterruptedSession { complete in
-
-      if complete {
-        self.resumeButton.isHidden = true
-        self.cameraUnavailableLabel.isHidden = true
-      } else {
-        self.presentUnableToResumeSessionAlert()
-      }
-    }
+//    cameraCapture.resumeInterruptedSession { complete in
+//
+//      if complete {
+//        self.resumeButton.isHidden = true
+//        self.cameraUnavailableLabel.isHidden = true
+//      } else {
+//        self.presentUnableToResumeSessionAlert()
+//      }
+//    }
   }
-
+  func setupARSession(){
+      ARDataLogger.ARLogger.shared.doAynchronousUploads = false
+      ARDataLogger.ARLogger.shared.dataDir = "depth_benchmarking"
+      ARDataLogger.ARLogger.shared.startTrial()
+        //1. Set The AR Session
+      previewView.delegate = self
+      previewView.debugOptions = [.showFeaturePoints]
+        
+      configuration.planeDetection = [.horizontal, .vertical]
+      if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+          configuration.frameSemantics = .sceneDepth
+      }
+      previewView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+      previewView.session.delegate = self
+  }
   func presentUnableToResumeSessionAlert() {
     let alert = UIAlertController(
       title: "Unable to Resume Session",
@@ -216,24 +236,16 @@ extension ViewController: CameraFeedManagerDelegate {
   func cameraFeedManagerDidEncounterSessionRunTimeError(_ manager: CameraFeedManager) {
     // Handles session run time error by updating the UI and providing a button if session can be
     // manually resumed.
-    self.resumeButton.isHidden = false
   }
 
   func cameraFeedManager(
     _ manager: CameraFeedManager, sessionWasInterrupted canResumeManually: Bool
   ) {
-    // Updates the UI when session is interupted.
-    if canResumeManually {
-      self.resumeButton.isHidden = false
-    } else {
-      self.cameraUnavailableLabel.isHidden = false
-    }
+
   }
 
   func cameraFeedManagerDidEndSessionInterruption(_ manager: CameraFeedManager) {
-    // Updates UI once session interruption has ended.
-    self.cameraUnavailableLabel.isHidden = true
-    self.resumeButton.isHidden = true
+
   }
 
   func presentVideoConfigurationErrorAlert(_ manager: CameraFeedManager) {
@@ -486,4 +498,36 @@ fileprivate enum ProcessingTimes: Int, CaseIterable {
       return "Inference Time"
     }
   }
+}
+
+
+extension ViewController: ARSessionDelegate {
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        ARDataLogger.ARLogger.shared.session(session, didUpdate: frame)
+        if -lastFrameUploadTime.timeIntervalSinceNow > 0.2 {
+            lastFrameUploadTime = Date()
+            do {
+                let convertedImage = try AECapturedTools(frame: frame)
+                if let rgbBuffer = convertedImage.rgbPixel {
+                    print(CVPixelBufferGetPixelFormatName(pixelBuffer: rgbBuffer))
+                    runModel(on: rgbBuffer)
+                }
+            } catch {
+                print("error converting image")
+            }
+            //ARDataLogger.ARLogger.shared.log(frame: frame, withType: "depth_benchmarking", withMeshLoggingBehavior: .none)
+        }
+    }
+
+    func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
+        ARDataLogger.ARLogger.shared.session(session, didAdd: anchors)
+    }
+    
+    func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
+        ARDataLogger.ARLogger.shared.session(session, didUpdate: anchors)
+    }
+
+    func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
+        ARDataLogger.ARLogger.shared.session(session, didRemove: anchors)
+    }
 }
