@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0CDA8C85042ADF65D0787629 /* Pods_Midas.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1CE41C09920CCEC31985547 /* Pods_Midas.framework */; };
-		1709ADB22881B5C8007B3A68 /* model-small-70d6b9c8.pt in Resources */ = {isa = PBXBuildFile; fileRef = 1709ADB12881B5C8007B3A68 /* model-small-70d6b9c8.pt */; };
 		17526E2D2885A1EE00175C0B /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 17526E2C2885A1EE00175C0B /* FirebaseAnalytics */; };
 		17526E2F2885A1EE00175C0B /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 17526E2E2885A1EE00175C0B /* FirebaseAnalyticsSwift */; };
 		17526E312885A1EE00175C0B /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 17526E302885A1EE00175C0B /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -57,7 +56,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1709ADB12881B5C8007B3A68 /* model-small-70d6b9c8.pt */ = {isa = PBXFileReference; lastKnownFileType = file; path = "model-small-70d6b9c8.pt"; sourceTree = "<group>"; };
 		17526E602885A3EC00175C0B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8402440023D9834600704ABD /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		840ECB1F238BAA2300C7D88A /* InfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCell.swift; sourceTree = "<group>"; };
@@ -175,7 +173,6 @@
 		848842A22370180C0043FC4C /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				1709ADB12881B5C8007B3A68 /* model-small-70d6b9c8.pt */,
 				84F232D4254C831E0011862E /* model_opt.tflite */,
 			);
 			path = Model;
@@ -355,7 +352,6 @@
 				17526E612885A3EC00175C0B /* GoogleService-Info.plist in Resources */,
 				84F232D5254C831E0011862E /* model_opt.tflite in Resources */,
 				840EDD022341DE380017ED42 /* Main.storyboard in Resources */,
-				1709ADB22881B5C8007B3A68 /* model-small-70d6b9c8.pt in Resources */,
 				840EDCFD2341DDD30017ED42 /* Launch Screen.storyboard in Resources */,
 				84FCF5922387BD7900663812 /* tfl_logo.png in Resources */,
 				84B67CF62326338400A11A08 /* Assets.xcassets in Resources */,
