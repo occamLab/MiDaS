@@ -21,7 +21,6 @@ import FirebaseAuth
 import Foundation
 import ARDataLogger
 
-
 public struct PixelData {
     var a: UInt8
     var r: UInt8
@@ -55,6 +54,9 @@ extension UIImage {
 
 class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: Storyboards Connections
+    let calculateMIDAS = false
+    let uploadData = false
+   
   @IBOutlet weak var previewView: ARSCNView!
 
   //@IBOutlet weak var overlayView: OverlayView!
@@ -505,17 +507,26 @@ extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         ARDataLogger.ARLogger.shared.session(session, didUpdate: frame)
         if -lastFrameUploadTime.timeIntervalSinceNow > 0.2 {
-            lastFrameUploadTime = Date()
-            do {
-                let convertedImage = try AECapturedTools(frame: frame)
-                if let rgbBuffer = convertedImage.rgbPixel {
-                    print(CVPixelBufferGetPixelFormatName(pixelBuffer: rgbBuffer))
-                    runModel(on: rgbBuffer)
-                }
-            } catch {
-                print("error converting image")
+            if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
+                let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame)
+                let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: truePointCloud)
+                let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
             }
-            //ARDataLogger.ARLogger.shared.log(frame: frame, withType: "depth_benchmarking", withMeshLoggingBehavior: .none)
+            lastFrameUploadTime = Date()
+            if calculateMIDAS {
+                do {
+                    let convertedImage = try AECapturedTools(frame: frame)
+                    if let rgbBuffer = convertedImage.rgbPixel {
+                        print(CVPixelBufferGetPixelFormatName(pixelBuffer: rgbBuffer))
+                        runModel(on: rgbBuffer)
+                    }
+                } catch {
+                    print("error converting image")
+                }
+            }
+            if uploadData {
+                ARDataLogger.ARLogger.shared.log(frame: frame, withType: "depth_benchmarking", withMeshLoggingBehavior: .none)
+            }
         }
     }
 
