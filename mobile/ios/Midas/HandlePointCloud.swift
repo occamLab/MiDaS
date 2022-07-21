@@ -10,7 +10,9 @@ import ARKit
 import ARDataLogger
 
 func getTrueLidarPointCloud(logFrame: ARFrameDataLog) -> [simd_float3] {
-    let depthData = logFrame.depthData
+    var depthData = logFrame.depthData
+    let confidence = logFrame.confData
+    depthData = depthData.filter{confidence[depthData.firstIndex(of: $0)!].rawValue == 2}
     return depthData.map({ point in point.w * simd_float3(point.x, point.y, point.z) })
 }
 
@@ -21,7 +23,7 @@ func getGlobalPointCloud(logFrame: ARFrameDataLog, truePointCloud: [simd_float3]
     let yAxis = simd_float3(0, 1, 0)
     let rotationMatrix = float4x4(simd_quatf(angle: -theta, axis: yAxis))
     let yawAdjustedPointCloud = globalPointCloud.map({ point in rotationMatrix * point })
-    return yawAdjustedPointCloud.map({point in [point[0], point[1], point[2]]})
+    return yawAdjustedPointCloud.map({point in simd_float3(point[0], point[1], point[2])})
 }
 
 func isolateObstacles(logFrame: ARFrameDataLog, yawAdjustedPointCloud: [simd_float3]) -> [simd_float3] {
@@ -31,7 +33,7 @@ func isolateObstacles(logFrame: ARFrameDataLog, yawAdjustedPointCloud: [simd_flo
     let xValues = filteredPointCloud.map({ point in point[0]})
     let xOffset = (xValues.max()! + xValues.min()!) / 2
     let yOffset = filteredPointCloud.map({point in point[1]}).min()
-    filteredPointCloud = filteredPointCloud.map({ point in [point[0] - xOffset, point[1] - yOffset!, point[2]]})
-    filteredPointCloud = filteredPointCloud.filter{$0[0] <= 1 && $0[1] > 0.25}
+    filteredPointCloud = filteredPointCloud.map({ point in simd_float3(point[0] - xOffset, point[1] - yOffset!, point[2])})
+    filteredPointCloud = filteredPointCloud.filter{abs($0[0]) <= 0.5 && $0[1] > 0.25}
     return filteredPointCloud
 }
