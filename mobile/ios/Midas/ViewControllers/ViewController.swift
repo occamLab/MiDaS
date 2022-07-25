@@ -511,6 +511,8 @@ extension ViewController: ARSessionDelegate {
                 let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame)
                 let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: truePointCloud)
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
+                let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
+                print(obstacles)
             }
             lastFrameUploadTime = Date()
             if calculateMIDAS {
