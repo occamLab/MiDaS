@@ -506,13 +506,15 @@ fileprivate enum ProcessingTimes: Int, CaseIterable {
 extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         ARDataLogger.ARLogger.shared.session(session, didUpdate: frame)
-        if -lastFrameUploadTime.timeIntervalSinceNow > 0.2 {
+        if -lastFrameUploadTime.timeIntervalSinceNow > 1 {
+            print("getting the cloud")
             if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
                 let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame)
                 let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: truePointCloud)
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                print(obstacles)
+                print("obstacles: \(obstacles)")
+
             }
             lastFrameUploadTime = Date()
             if calculateMIDAS {

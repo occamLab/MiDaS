@@ -11,10 +11,16 @@ import ARDataLogger
 import MetricKit
 
 func getTrueLidarPointCloud(logFrame: ARFrameDataLog) -> [simd_float3] {
-    var depthData = logFrame.depthData
+    let depthData = logFrame.depthData
     let confidence = logFrame.confData
-    depthData = depthData.filter{confidence[depthData.firstIndex(of: $0)!].rawValue == 2}
-    return depthData.map({ point in point.w * simd_float3(point.x, point.y, point.z) })
+    var highConfidenceData : [simd_float4] = []
+    
+    for (idx, depthDatum) in depthData.enumerated() {
+        if confidence[idx].rawValue == 2 {
+            highConfidenceData.append(depthDatum)
+        }
+    }
+    return highConfidenceData.map({ point in point.w * simd_float3(point.x, point.y, point.z) })
 }
 
 func getGlobalPointCloud(logFrame: ARFrameDataLog, truePointCloud: [simd_float3]) -> [simd_float3] {
