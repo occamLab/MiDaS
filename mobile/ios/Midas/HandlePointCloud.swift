@@ -51,7 +51,7 @@ func findObstacles(filteredPointCloud: [simd_float3]) -> [Float] {
     let maxZValue = Float(-4)
     let stepSize = Float(-0.1)
     let binLeftEdges = Array(stride(from: minZValue, through: maxZValue, by: stepSize))
-    var hist: [Int] = []
+    var hist: [Int] = [0]
     for binEdge in binLeftEdges {
         let leftEdge = binEdge
         let rightEdge = binEdge + stepSize  // TODO: get rid of this magic number using a linspace approach
@@ -69,6 +69,7 @@ func findObstacles(filteredPointCloud: [simd_float3]) -> [Float] {
             localMaxes.append(-binLeftEdges[i])
         }
     }
+    print(hist)
     return localMaxes
 }
 
