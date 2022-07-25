@@ -8,6 +8,7 @@
 import AVFoundation
 import ARKit
 import ARDataLogger
+import MetricKit
 
 func getTrueLidarPointCloud(logFrame: ARFrameDataLog) -> [simd_float3] {
     var depthData = logFrame.depthData
@@ -37,3 +38,31 @@ func isolateObstacles(logFrame: ARFrameDataLog, yawAdjustedPointCloud: [simd_flo
     filteredPointCloud = filteredPointCloud.filter{abs($0[0]) <= 0.5 && $0[1] > 0.25}
     return filteredPointCloud
 }
+
+func findObstacles(filteredPointCloud: [simd_float3]) -> [Float] {
+    let zValues = filteredPointCloud.map({ point in point[2]})
+    // TODO: convert binLeftEdges to meters (use Float)
+    let minZValue = Float(0)
+    let maxZValue = Float(-5)
+    let stepSize = Float(-0.1)
+    let binLeftEdges = Array(stride(from: minZValue, through: maxZValue, by: stepSize))
+    var hist: [Int] = []
+    for binEdge in binLeftEdges {
+        let leftEdge = binEdge
+        let rightEdge = binEdge + stepSize  // TODO: get rid of this magic number using a linspace approach
+        let filteredZValues = zValues.filter({z in z >= leftEdge && z < rightEdge})
+        let numberInBin = filteredZValues.count
+        hist.append(numberInBin)
+    }
+    var localMaxes : [Float] = []
+    for i in 1..<binLeftEdges.count-1 {
+        let leftCount = hist[i-1]
+        let centerCount = hist[i]
+        let rightCount = hist[i+1]
+        if centerCount > leftCount && centerCount > rightCount {
+            localMaxes.append(binLeftEdges[i])
+        }
+    }
+    return localMaxes
+}
+
