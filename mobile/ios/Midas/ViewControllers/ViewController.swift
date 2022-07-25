@@ -512,6 +512,7 @@ extension ViewController: ARSessionDelegate {
                 let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame)
                 let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: truePointCloud)
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
+                print("filtered point cloud size: \(filteredPointCloud.count)")
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
                 print("obstacles: \(obstacles)")
 
