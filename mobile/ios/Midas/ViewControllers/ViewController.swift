@@ -514,7 +514,9 @@ extension ViewController: ARSessionDelegate {
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 print("filtered point cloud size: \(filteredPointCloud.count)")
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                print("obstacles: \(obstacles)")
+                if let closestObstacle = obstacles.min() {
+                    AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0) meters")
+                }
 
             }
             lastFrameUploadTime = Date()

@@ -14,7 +14,6 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog) -> [simd_float3] {
     let depthData = logFrame.depthData
     let confidence = logFrame.confData
     var highConfidenceData : [simd_float4] = []
-    
     for (idx, depthDatum) in depthData.enumerated() {
         if confidence[idx].rawValue == 2 {
             highConfidenceData.append(depthDatum)
