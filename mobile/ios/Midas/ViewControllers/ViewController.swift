@@ -54,7 +54,7 @@ extension UIImage {
 
 class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: Storyboards Connections
-    let calculateMIDAS = true
+    let calculateMIDAS = false
     let uploadData = false
    
   @IBOutlet weak var previewView: ARSCNView!
@@ -517,7 +517,10 @@ extension ViewController: ARSessionDelegate {
                 print("filtered point cloud size: \(filteredPointCloud.count)")
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
                 if let closestObstacle = obstacles.min() {
-                    AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0) meters")
+                    if closestObstacle >= 1 {AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0) meters")
+                    } else{
+                        AnnouncementManager.shared.announce(announcement: "point \(Int(round(closestObstacle * 10))) meters")
+                    }
                 }
             }
             lastFrameUploadTime = Date()
