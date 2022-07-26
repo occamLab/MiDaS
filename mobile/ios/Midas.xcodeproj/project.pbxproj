@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0CDA8C85042ADF65D0787629 /* Pods_Midas.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1CE41C09920CCEC31985547 /* Pods_Midas.framework */; };
+		173E19BD2890234300D383AD /* HandleMidas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173E19BC2890234300D383AD /* HandleMidas.swift */; };
 		17526E2D2885A1EE00175C0B /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 17526E2C2885A1EE00175C0B /* FirebaseAnalytics */; };
 		17526E2F2885A1EE00175C0B /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 17526E2E2885A1EE00175C0B /* FirebaseAnalyticsSwift */; };
 		17526E312885A1EE00175C0B /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 17526E302885A1EE00175C0B /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -58,6 +59,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		173E19BC2890234300D383AD /* HandleMidas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandleMidas.swift; sourceTree = "<group>"; };
 		17526E602885A3EC00175C0B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8402440023D9834600704ABD /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		840ECB1F238BAA2300C7D88A /* InfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCell.swift; sourceTree = "<group>"; };
@@ -217,6 +219,7 @@
 			isa = PBXGroup;
 			children = (
 				98F10ABE2888564500F0D998 /* HandlePointCloud.swift */,
+				173E19BC2890234300D383AD /* HandleMidas.swift */,
 				840ECB1E238BAA0D00C7D88A /* Cells */,
 				842DDB6C2372A80E00F6BB94 /* Views */,
 				848842A22370180C0043FC4C /* Model */,
@@ -416,6 +419,7 @@
 			files = (
 				842DDB6E2372A82000F6BB94 /* OverlayView.swift in Sources */,
 				846BAF7623E7FE13006FC136 /* Constants.swift in Sources */,
+				173E19BD2890234300D383AD /* HandleMidas.swift in Sources */,
 				98F10ABF2888564500F0D998 /* HandlePointCloud.swift in Sources */,
 				84952CB92361874A0052C104 /* TFLiteExtension.swift in Sources */,
 				84D6576D2387BB7E0048171E /* CGSizeExtension.swift in Sources */,
