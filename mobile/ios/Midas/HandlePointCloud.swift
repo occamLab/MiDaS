@@ -10,16 +10,38 @@ import ARKit
 import ARDataLogger
 import MetricKit
 
-func getTrueLidarPointCloud(logFrame: ARFrameDataLog) -> [simd_float3] {
+func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -> [simd_float3] {
     let depthData = logFrame.depthData
     let confidence = logFrame.confData
-    var highConfidenceData : [simd_float4] = []
-    for (idx, depthDatum) in depthData.enumerated() {
-        if confidence[idx].rawValue == 2 {
-            highConfidenceData.append(depthDatum)
+    var highConfidenceData : [simd_float3] = []
+    let threeDPoints = depthData.map({ point in point.w * simd_float3(point.x, point.y, point.z) })
+    var isPointCloseToPlane: [Bool] = Array(repeating: false, count: threeDPoints.count)
+    
+    for plane in planes {
+        let cameraToPlaneTransform =  plane.transform.inverse * logFrame.pose
+        let pointCloudInPlane = threeDPoints.map({ threeDPoint in cameraToPlaneTransform * simd_float4(threeDPoint, 1.0) })
+        for (idx, p) in pointCloudInPlane.enumerated() {
+            if abs(p.y) < 0.05, p.x >= plane.center.x - plane.extent.x/2, p.x <= plane.center.x + plane.extent.x/2, p.z >= plane.center.z - plane.extent.z/2, p.z <= plane.center.z + plane.extent.z/2 {
+                isPointCloseToPlane[idx] = true
+            }
         }
     }
-    return highConfidenceData.map({ point in point.w * simd_float3(point.x, point.y, point.z) })
+    
+    for (idx, threeDPoint) in threeDPoints.enumerated() {
+        if confidence[idx].rawValue == 2 && !isPointCloseToPlane[idx] {
+            highConfidenceData.append(threeDPoint)
+        }
+    }
+    print("highConfidenceData.count \(highConfidenceData.count)")
+    if highConfidenceData.count < 12000 {
+        print("[")
+        for p in highConfidenceData {
+            print("[\(p.x), \(p.y), \(p.z)]")
+        }
+        print("]")
+        print("hello")
+    }
+    return highConfidenceData
 }
 
 func getGlobalPointCloud(logFrame: ARFrameDataLog, truePointCloud: [simd_float3]) -> [simd_float3] {

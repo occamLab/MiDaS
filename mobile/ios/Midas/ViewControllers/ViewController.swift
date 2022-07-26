@@ -54,7 +54,7 @@ extension UIImage {
 
 class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: Storyboards Connections
-    let calculateMIDAS = false
+    let calculateMIDAS = true
     let uploadData = false
    
   @IBOutlet weak var previewView: ARSCNView!
@@ -280,10 +280,10 @@ extension ViewController: CameraFeedManagerDelegate {
     present(alertController, animated: true, completion: nil)
   }
 
-  @objc func runModel(on pixelBuffer: CVPixelBuffer) {
+  @objc func runModel(on pixelBuffer: CVPixelBuffer)->[Float]? {
     guard let overlayViewFrame = overlayViewFrame, let previewViewFrame = previewViewFrame
     else {
-      return
+      return nil
     }
     // To put `overlayView` area as model input, transform `overlayViewFrame` following transform
     // from `previewView` to `pixelBuffer`. `previewView` area is transformed to fit in
@@ -300,7 +300,7 @@ extension ViewController: CameraFeedManagerDelegate {
         to: overlayViewFrame.size)
     else {
       os_log("Cannot get inference result.", type: .error)
-      return
+      return nil
     }
 
     if avg_latency == 0 {
@@ -375,6 +375,7 @@ extension ViewController: CameraFeedManagerDelegate {
         self.overlayView.setNeedsDisplay()
         */
     }
+      return result
   }
 /*
   func drawResult(of result: Result) {
@@ -509,7 +510,8 @@ extension ViewController: ARSessionDelegate {
         if -lastFrameUploadTime.timeIntervalSinceNow > 1 {
             print("getting the cloud")
             if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
-                let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame)
+                let planes = frame.anchors.compactMap({ $0 as? ARPlaneAnchor })
+                let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame, planes: planes)
                 let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: truePointCloud)
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 print("filtered point cloud size: \(filteredPointCloud.count)")
@@ -517,15 +519,13 @@ extension ViewController: ARSessionDelegate {
                 if let closestObstacle = obstacles.min() {
                     AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0) meters")
                 }
-
             }
             lastFrameUploadTime = Date()
             if calculateMIDAS {
                 do {
                     let convertedImage = try AECapturedTools(frame: frame)
-                    if let rgbBuffer = convertedImage.rgbPixel {
+                    if let rgbBuffer = convertedImage.rgbPixel, let results = runModel(on: rgbBuffer) {
                         print(CVPixelBufferGetPixelFormatName(pixelBuffer: rgbBuffer))
-                        runModel(on: rgbBuffer)
                     }
                 } catch {
                     print("error converting image")

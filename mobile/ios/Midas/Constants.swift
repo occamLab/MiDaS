@@ -21,5 +21,5 @@ enum Constants {
 
   // MARK: - Constants related to the model interperter
   static let defaultThreadCount = 2
-  static let defaultDelegate: Delegates = .CPU
+  static let defaultDelegate: Delegates = .CoreML
 }
