@@ -37,7 +37,7 @@ func isolateObstacles(logFrame: ARFrameDataLog, yawAdjustedPointCloud: [simd_flo
     var filteredPointCloud = yawAdjustedPointCloud.map({ point in simd_float3(point[0], point[1], point[2] - depthOffset!)})
     filteredPointCloud = filteredPointCloud.filter{$0[2] >= -4}
     let xValues = filteredPointCloud.map({ point in point[0]})
-    let xOffset = (xValues.max() ?? 0 + (xValues.min() ?? 0)) / 2
+    let xOffset = ((xValues.max() ?? 0) + (xValues.min() ?? 0)) / 2
     let yOffset = filteredPointCloud.map({point in point[1]}).min()
     filteredPointCloud = filteredPointCloud.map({ point in simd_float3(point[0] - xOffset, point[1] - (yOffset ?? 0), point[2])})
     filteredPointCloud = filteredPointCloud.filter{abs($0[0]) <= 0.5 && $0[1] > 0.25}
