@@ -529,7 +529,7 @@ extension ViewController: ARSessionDelegate {
             AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters.")
             saidFirstAnnouncement = true
         }
-        if -lastFrameUploadTime.timeIntervalSinceNow > 0.5 {
+        if -lastFrameUploadTime.timeIntervalSinceNow > 0.75 {
             print("getting the cloud")
             if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
                 let planes = frame.anchors.compactMap({ $0 as? ARPlaneAnchor })
