@@ -18,11 +18,13 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
     var isPointCloseToPlane: [Bool] = Array(repeating: false, count: threeDPoints.count)
     
     for plane in planes {
-        let cameraToPlaneTransform =  plane.transform.inverse * logFrame.pose
-        let pointCloudInPlane = threeDPoints.map({ threeDPoint in cameraToPlaneTransform * simd_float4(threeDPoint, 1.0) })
-        for (idx, p) in pointCloudInPlane.enumerated() {
-            if abs(p.y) < 0.2, p.x >= plane.center.x - plane.extent.x/2, p.x <= plane.center.x + plane.extent.x/2, p.z >= plane.center.z - plane.extent.z/2, p.z <= plane.center.z + plane.extent.z/2 {
-                isPointCloseToPlane[idx] = true
+        if plane.classification.description == "other"{
+            let cameraToPlaneTransform =  plane.transform.inverse * logFrame.pose
+            let pointCloudInPlane = threeDPoints.map({ threeDPoint in cameraToPlaneTransform * simd_float4(threeDPoint, 1.0) })
+            for (idx, p) in pointCloudInPlane.enumerated() {
+                if abs(p.y) < 0.2, p.x >= plane.center.x - plane.extent.x/2, p.x <= plane.center.x + plane.extent.x/2, p.z >= plane.center.z - plane.extent.z/2, p.z <= plane.center.z + plane.extent.z/2 {
+                    isPointCloseToPlane[idx] = true
+                }
             }
         }
     }

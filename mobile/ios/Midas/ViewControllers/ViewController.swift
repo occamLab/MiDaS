@@ -505,6 +505,22 @@ fileprivate enum ProcessingTimes: Int, CaseIterable {
   }
 }
 
+/// Filters planes based on the classification type
+extension ARPlaneAnchor.Classification {
+    var description: String {
+            switch self {
+            case .table:
+                return "table"
+            case .seat:
+                return "seat"
+            case .none(.unknown):
+                return "object"
+            default:
+                return "other"
+            }
+        }
+}
+
 
 extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
@@ -513,7 +529,7 @@ extension ViewController: ARSessionDelegate {
             AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters.")
             saidFirstAnnouncement = true
         }
-        if -lastFrameUploadTime.timeIntervalSinceNow > 1 {
+        if -lastFrameUploadTime.timeIntervalSinceNow > 0.5 {
             print("getting the cloud")
             if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
                 let planes = frame.anchors.compactMap({ $0 as? ARPlaneAnchor })
