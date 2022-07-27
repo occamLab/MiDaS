@@ -21,7 +21,7 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
         let cameraToPlaneTransform =  plane.transform.inverse * logFrame.pose
         let pointCloudInPlane = threeDPoints.map({ threeDPoint in cameraToPlaneTransform * simd_float4(threeDPoint, 1.0) })
         for (idx, p) in pointCloudInPlane.enumerated() {
-            if abs(p.y) < 0.05, p.x >= plane.center.x - plane.extent.x/2, p.x <= plane.center.x + plane.extent.x/2, p.z >= plane.center.z - plane.extent.z/2, p.z <= plane.center.z + plane.extent.z/2 {
+            if abs(p.y) < 0.2, p.x >= plane.center.x - plane.extent.x/2, p.x <= plane.center.x + plane.extent.x/2, p.z >= plane.center.z - plane.extent.z/2, p.z <= plane.center.z + plane.extent.z/2 {
                 isPointCloseToPlane[idx] = true
             }
         }
@@ -33,7 +33,7 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
         }
     }
     print("highConfidenceData.count \(highConfidenceData.count)")
-    if highConfidenceData.count < 12000 {
+    if highConfidenceData.count < 0 {
         print("[")
         for p in highConfidenceData {
             print("[\(p.x), \(p.y), \(p.z)]")
@@ -58,7 +58,7 @@ func isolateObstacles(logFrame: ARFrameDataLog, yawAdjustedPointCloud: [simd_flo
     var filteredPointCloud = yawAdjustedPointCloud.filter{$0[2] >= -4}
     let yOffset = filteredPointCloud.map({point in point[1]}).min()
     filteredPointCloud = filteredPointCloud.map({ point in simd_float3(point[0], point[1] - (yOffset ?? 0), point[2])})
-    filteredPointCloud = filteredPointCloud.filter{abs($0[0]) <= 0.5 && $0[1] > 0.25}
+    filteredPointCloud = filteredPointCloud.filter{abs($0[0]) <= 0.5}
     return filteredPointCloud
 }
 

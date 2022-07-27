@@ -54,6 +54,8 @@ extension UIImage {
 
 class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: Storyboards Connections
+    let appStartTime = Date()
+    var saidFirstAnnouncement = false
     let calculateMIDAS = false
     let uploadData = false
    
@@ -507,6 +509,10 @@ fileprivate enum ProcessingTimes: Int, CaseIterable {
 extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         ARDataLogger.ARLogger.shared.session(session, didUpdate: frame)
+        if !saidFirstAnnouncement {
+            AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters.")
+            saidFirstAnnouncement = true
+        }
         if -lastFrameUploadTime.timeIntervalSinceNow > 1 {
             print("getting the cloud")
             if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
@@ -516,10 +522,9 @@ extension ViewController: ARSessionDelegate {
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 print("filtered point cloud size: \(filteredPointCloud.count)")
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                if let closestObstacle = obstacles.min() {
-                    if closestObstacle >= 1 {AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0) meters")
-                    } else{
-                        AnnouncementManager.shared.announce(announcement: "point \(Int(round(closestObstacle * 10))) meters")
+                if let closestObstacle = obstacles.min(){
+                    if Date().timeIntervalSince(appStartTime) > 4{
+                        AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
                     }
                 }
             }

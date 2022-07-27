@@ -32,7 +32,7 @@ class AnnouncementManager {
                   try audioSession.setCategory(AVAudioSession.Category.playback)
                   try audioSession.setActive(true)
                   let utterance = AVSpeechUtterance(string: announcement)
-                  utterance.rate = 0.6
+                  utterance.rate = 0.7
                   synth.speak(utterance)
               } catch {
                   print("Unexpected error announcing something using AVSpeechEngine!")
