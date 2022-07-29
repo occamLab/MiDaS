@@ -1,5 +1,7 @@
 # Tensorflow Lite MiDaS iOS Example
 
+The following is copied from the original MiDaS repo. Follow the steps below to be able to modify the app in Xcode.
+
 ### Requirements
 
 - XCode 11.0 or above
