@@ -57,44 +57,10 @@
                                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="THr-Uf-ggb" id="5T1-ZQ-m0o">
                                                             <rect key="frame" x="0.0" y="0.0" width="294" height="44"/>
                                                             <autoresizingMask key="autoresizingMask"/>
-                                                            <subviews>
-                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Field Label" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mTG-UQ-Lwc" userLabel="Field Name Label">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="176.5" height="19.5"/>
-                                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <color key="highlightedColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                </label>
-                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="100" verticalHuggingPriority="251" text="Info Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3kP-Ho-Tm4" userLabel="Info Label">
-                                                                    <rect key="frame" x="176.5" y="0.0" width="117.5" height="19.5"/>
-                                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                    <color key="highlightedColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                </label>
-                                                            </subviews>
                                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                            <constraints>
-                                                                <constraint firstItem="mTG-UQ-Lwc" firstAttribute="top" secondItem="5T1-ZQ-m0o" secondAttribute="top" id="4yW-Lh-MPd"/>
-                                                                <constraint firstItem="3kP-Ho-Tm4" firstAttribute="top" secondItem="5T1-ZQ-m0o" secondAttribute="top" id="JOU-KJ-V73"/>
-                                                                <constraint firstItem="3kP-Ho-Tm4" firstAttribute="width" secondItem="5T1-ZQ-m0o" secondAttribute="width" multiplier="0.4" id="NXu-3C-w9k"/>
-                                                                <constraint firstItem="mTG-UQ-Lwc" firstAttribute="width" secondItem="5T1-ZQ-m0o" secondAttribute="width" multiplier="0.6" id="Vvh-cz-q4K"/>
-                                                                <constraint firstItem="3kP-Ho-Tm4" firstAttribute="leading" secondItem="mTG-UQ-Lwc" secondAttribute="trailing" id="kwA-sz-1zt"/>
-                                                                <constraint firstItem="mTG-UQ-Lwc" firstAttribute="leading" secondItem="5T1-ZQ-m0o" secondAttribute="leading" id="kxa-T6-w0h"/>
-                                                            </constraints>
                                                         </tableViewCellContentView>
                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                        <constraints>
-                                                            <constraint firstItem="3kP-Ho-Tm4" firstAttribute="top" secondItem="THr-Uf-ggb" secondAttribute="top" id="XTX-Dy-sDb"/>
-                                                            <constraint firstItem="3kP-Ho-Tm4" firstAttribute="trailing" secondItem="THr-Uf-ggb" secondAttribute="trailing" id="kX7-5L-aoX"/>
-                                                        </constraints>
-                                                        <connections>
-                                                            <outlet property="fieldNameLabel" destination="mTG-UQ-Lwc" id="7HD-r4-86n"/>
-                                                            <outlet property="infoLabel" destination="3kP-Ho-Tm4" id="nMw-We-0cp"/>
-                                                        </connections>
                                                     </tableViewCell>
                                                 </prototypes>
                                                 <connections>
@@ -150,6 +116,24 @@
                                                     </segmentedControl>
                                                 </subviews>
                                             </stackView>
+                                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LqC-a7-icC">
+                                                <rect key="frame" x="237" y="8" width="78" height="58"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="plain" title="Feet"/>
+                                                <connections>
+                                                    <action selector="feetButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ohn-oB-Ulr"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vcc-Um-4uv">
+                                                <rect key="frame" x="60" y="8" width="100" height="58"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="plain" title="Meters"/>
+                                                <connections>
+                                                    <action selector="metersButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gUa-L5-tTl"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
@@ -198,6 +182,8 @@
                     </view>
                     <connections>
                         <outlet property="delegatesControl" destination="kS9-M8-aNu" id="aq5-y6-e3w"/>
+                        <outlet property="feetButton" destination="LqC-a7-icC" id="Wta-IK-eid"/>
+                        <outlet property="meterButton" destination="Vcc-Um-4uv" id="mDj-NM-4OR"/>
                         <outlet property="overlayView" destination="FLM-9o-o4W" id="06u-Ci-QDR"/>
                         <outlet property="previewView" destination="aEU-Ov-crs" id="NMN-in-8FS"/>
                         <outlet property="tableView" destination="3e4-S8-Ouh" id="bhz-PY-Fhd"/>

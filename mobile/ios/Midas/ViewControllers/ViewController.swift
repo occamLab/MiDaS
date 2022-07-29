@@ -58,7 +58,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var saidFirstAnnouncement = false
     let calculateMIDAS = false
     let uploadData = false
-   
+    var meters = true
+    
   @IBOutlet weak var previewView: ARSCNView!
 
   //@IBOutlet weak var overlayView: OverlayView!
@@ -68,6 +69,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
   private var imageViewInitialized: Bool = false
 
+  @IBOutlet var meterButton: UIButton!
+  @IBOutlet var feetButton: UIButton!
+    
   @IBOutlet weak var tableView: UITableView!
 
   @IBOutlet weak var threadCountLabel: UILabel!
@@ -162,7 +166,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     previewViewFrame = previewView.frame
   }
 
-  // MARK: Button Actions
+    @IBAction func metersButtonTapped(_ sender: Any) {
+        if meters == false {
+            AnnouncementManager.shared.announce(announcement: "Switched units to meters")
+            meters = true
+        }
+    }
+    
+    @IBAction func feetButtonTapped(_ sender: Any) {
+        if meters == true {
+            AnnouncementManager.shared.announce(announcement: "Switched units to feet")
+            meters = false
+        }
+    }
+
+    // MARK: Button Actions
   @IBAction func didChangeThreadCount(_ sender: UIStepper) {
     let changedCount = Int(sender.value)
     if threadCountLabel.text == changedCount.description {
@@ -526,7 +544,7 @@ extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         ARDataLogger.ARLogger.shared.session(session, didUpdate: frame)
         if !saidFirstAnnouncement {
-            AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters.")
+            AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters. Press meter or feet button to switch units.")
             saidFirstAnnouncement = true
         }
         if -lastFrameUploadTime.timeIntervalSinceNow > 0.75 {
@@ -540,7 +558,12 @@ extension ViewController: ARSessionDelegate {
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
                 if let closestObstacle = obstacles.min(){
                     if Date().timeIntervalSince(appStartTime) > 4{
-                        AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
+                        if meters == true{
+                            AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
+                        }
+                        else{
+                            AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
+                        }
                     }
                 }
             }
