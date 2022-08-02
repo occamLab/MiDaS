@@ -59,6 +59,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let calculateMIDAS = false
     let uploadData = false
     var meters = true
+    var haptic = true
     
   @IBOutlet weak var previewView: ARSCNView!
 
@@ -69,8 +70,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
   private var imageViewInitialized: Bool = false
 
+  @IBOutlet var unitsLabel: UILabel!
   @IBOutlet var meterButton: UIButton!
   @IBOutlet var feetButton: UIButton!
+    
+  @IBOutlet var hapticButton: UIButton!
+  @IBOutlet var feedbackLabel: UILabel!
+  @IBOutlet var voiceButton: UIButton!
     
   @IBOutlet weak var tableView: UITableView!
 
@@ -119,36 +125,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 
     //cameraCapture.delegate = self
-    tableView.delegate = self
-    tableView.dataSource = self
+    //tableView.delegate = self
+    //tableView.dataSource = self
 
     // MARK: UI Initialization
     // Setup thread count stepper with white color.
     // https://forums.developer.apple.com/thread/121495
-    threadCountStepper.setDecrementImage(
-      threadCountStepper.decrementImage(for: .normal), for: .normal)
-    threadCountStepper.setIncrementImage(
-      threadCountStepper.incrementImage(for: .normal), for: .normal)
-    // Setup initial stepper value and its label.
-    threadCountStepper.value = Double(Constants.defaultThreadCount)
-    threadCountLabel.text = Constants.defaultThreadCount.description
-
-    // Setup segmented controller's color.
-    delegatesControl.setTitleTextAttributes(
-      [NSAttributedString.Key.foregroundColor: UIColor.lightGray],
-      for: .normal)
-    delegatesControl.setTitleTextAttributes(
-      [NSAttributedString.Key.foregroundColor: UIColor.black],
-      for: .selected)
-    // Remove existing segments to initialize it with `Delegates` entries.
-    delegatesControl.removeAllSegments()
-    Delegates.allCases.forEach { delegate in
-      delegatesControl.insertSegment(
-        withTitle: delegate.description,
-        at: delegate.rawValue,
-        animated: false)
-    }
-    delegatesControl.selectedSegmentIndex = 0
+      meterButton.backgroundColor = UIColor.white
+      feetButton.backgroundColor = UIColor.lightGray
+      hapticButton.backgroundColor = UIColor.white
+      voiceButton.backgroundColor = UIColor.lightGray
+      unitsLabel.textColor = UIColor.white
+      feedbackLabel.textColor = UIColor.white
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -165,11 +153,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     overlayViewFrame = overlayView.frame
     previewViewFrame = previewView.frame
   }
-
+    
+    
+    @IBAction func hapticButtonTapped(_ sender: Any) {
+        if haptic == false {
+            haptic = true
+            hapticButton.backgroundColor = UIColor.white
+            voiceButton.backgroundColor = UIColor.lightGray
+        }
+    }
+    
+    @IBAction func voiceButtonTapped(_ sender: Any) {
+        if haptic == true {
+            haptic = false
+            hapticButton.backgroundColor = UIColor.lightGray
+            voiceButton.backgroundColor = UIColor.white
+        }
+    }
+    
     @IBAction func metersButtonTapped(_ sender: Any) {
         if meters == false {
             AnnouncementManager.shared.announce(announcement: "Switched units to meters")
             meters = true
+            meterButton.backgroundColor = UIColor.white
+            feetButton.backgroundColor = UIColor.lightGray
         }
     }
     
@@ -177,6 +184,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if meters == true {
             AnnouncementManager.shared.announce(announcement: "Switched units to feet")
             meters = false
+            meterButton.backgroundColor = UIColor.lightGray
+            feetButton.backgroundColor = UIColor.white
         }
     }
 
