@@ -61,6 +61,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let uploadData = false
     var meters = true
     var haptic = true
+    var voice = true
     var closestObstacle: Float?
     
   @IBOutlet weak var previewView: ARSCNView!
@@ -133,7 +134,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     //tableView.dataSource = self
       let hapticTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { timer in
           if let closestObstacle = self.closestObstacle, self.haptic == true {
-              AnnouncementManager.shared.vibrate(intensity: 1/(2 * (closestObstacle + 0.4)))
+              AnnouncementManager.shared.vibrate(intensity: min(1/(2 * (closestObstacle - 0.2)) + 0.1, 1))
           }
       }
     // MARK: UI Initialization
@@ -142,7 +143,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
       meterButton.backgroundColor = UIColor.white
       feetButton.backgroundColor = UIColor.lightGray
       hapticButton.backgroundColor = UIColor.white
-      voiceButton.backgroundColor = UIColor.lightGray
+      voiceButton.backgroundColor = UIColor.white
       unitsLabel.textColor = UIColor.white
       feedbackLabel.textColor = UIColor.white
   }
@@ -167,15 +168,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if haptic == false {
             haptic = true
             hapticButton.backgroundColor = UIColor.white
-            voiceButton.backgroundColor = UIColor.lightGray
+            AnnouncementManager.shared.announce(announcement: "Haptic feedback on.")
+        }
+        else {
+            haptic = false
+            hapticButton.backgroundColor = UIColor.lightGray
+            AnnouncementManager.shared.announce(announcement: "Haptic feedback off.")
         }
     }
     
     @IBAction func voiceButtonTapped(_ sender: Any) {
-        if haptic == true {
-            haptic = false
-            hapticButton.backgroundColor = UIColor.lightGray
+        if voice == false {
+            voice = true
             voiceButton.backgroundColor = UIColor.white
+            AnnouncementManager.shared.announce(announcement: "Voice veedback on.")
+        }
+        else {
+            voice = false
+            voiceButton.backgroundColor = UIColor.lightGray
+            AnnouncementManager.shared.announce(announcement: "Voice feedback off.")
         }
     }
     
@@ -561,7 +572,7 @@ extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         ARDataLogger.ARLogger.shared.session(session, didUpdate: frame)
         if !saidFirstAnnouncement {
-            AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters. Press meter or feet button to switch units.")
+            AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters. Press meter or feet button to switch units. Press haptic or voice button to customize feedback.")
             saidFirstAnnouncement = true
         }
         if -lastFrameUploadTime.timeIntervalSinceNow > 0.75 {
@@ -576,7 +587,7 @@ extension ViewController: ARSessionDelegate {
                 self.closestObstacle = obstacles.min()
                 if let closestObstacle = closestObstacle {
                     if Date().timeIntervalSince(appStartTime) > 4{
-                        if haptic == false{
+                        if voice == true{
                             if meters == true{
                                 AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
                             }
