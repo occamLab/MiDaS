@@ -572,7 +572,16 @@ extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         ARDataLogger.ARLogger.shared.session(session, didUpdate: frame)
         if !saidFirstAnnouncement {
-            AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters. Press meter or feet button to switch units. Press haptic or voice button to customize feedback.")
+            let supportLiDAR = ARWorldTrackingConfiguration.supportsSceneReconstruction(.mesh)
+            if !supportLiDAR {
+                let lidarNotAvailableAlert = UIAlertController(title: "LiDAR Not Available", message: "Object detection will not work on your device", preferredStyle: UIAlertController.Style.alert)
+                lidarNotAvailableAlert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
+                self.present(lidarNotAvailableAlert, animated: true, completion: nil)
+                AnnouncementManager.shared.announce(announcement: "Warning. Your device is not equipped with a LiDAR sensor. Object detection is not available.")
+            }
+            else{
+                AnnouncementManager.shared.announce(announcement: "Announcing object distances from camera in meters. Press meter or feet button to switch units. Press haptic or voice button to customize feedback.")
+            }
             saidFirstAnnouncement = true
         }
         if -lastFrameUploadTime.timeIntervalSinceNow > 0.75 {
