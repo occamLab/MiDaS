@@ -20,6 +20,7 @@ import FirebaseStorage
 import FirebaseAuth
 import Foundation
 import ARDataLogger
+import AudioToolbox
 
 public struct PixelData {
     var a: UInt8
@@ -60,6 +61,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let uploadData = false
     var meters = true
     var haptic = true
+    var closestObstacle: Float?
     
   @IBOutlet weak var previewView: ARSCNView!
 
@@ -123,11 +125,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     } catch let error {
       fatalError(error.localizedDescription)
     }
+      
+    AnnouncementManager.shared.startHaptics()
 
     //cameraCapture.delegate = self
     //tableView.delegate = self
     //tableView.dataSource = self
-
+      let hapticTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { timer in
+          if let closestObstacle = self.closestObstacle, self.haptic == true {
+              AnnouncementManager.shared.vibrate(intensity: 1/(2 * (closestObstacle + 0.4)))
+          }
+      }
     // MARK: UI Initialization
     // Setup thread count stepper with white color.
     // https://forums.developer.apple.com/thread/121495
@@ -565,13 +573,16 @@ extension ViewController: ARSessionDelegate {
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 print("filtered point cloud size: \(filteredPointCloud.count)")
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                if let closestObstacle = obstacles.min(){
+                self.closestObstacle = obstacles.min()
+                if let closestObstacle = closestObstacle {
                     if Date().timeIntervalSince(appStartTime) > 4{
-                        if meters == true{
-                            AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
-                        }
-                        else{
-                            AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
+                        if haptic == false{
+                            if meters == true{
+                                AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
+                            }
+                            else {
+                                AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
+                            }
                         }
                     }
                 }
