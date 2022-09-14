@@ -27,6 +27,9 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
                 }
             }
         }
+        else if plane.classification.description != "object"{
+            AnnouncementManager.shared.announce(announcement: plane.classification.description)
+        }
     }
     
     for (idx, threeDPoint) in threeDPoints.enumerated() {
