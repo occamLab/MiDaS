@@ -559,6 +559,8 @@ extension ARPlaneAnchor.Classification {
                 return "table"
             case .seat:
                 return "seat"
+            case .door:
+                return "door"
             case .none(.unknown):
                 return "object"
             default:
@@ -593,15 +595,20 @@ extension ViewController: ARSessionDelegate {
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 print("filtered point cloud size: \(filteredPointCloud.count)")
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                self.closestObstacle = obstacles.min()
-                if let closestObstacle = closestObstacle {
-                    if Date().timeIntervalSince(appStartTime) > 4{
-                        if voice == true{
-                            if meters == true{
-                                AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
-                            }
-                            else {
-                                AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
+                if obstacles.count > 3 {
+                    AnnouncementManager.shared.announce(announcement: "Warning. You are in a cluttered environment. Obstacle detection accuracy will be low.")
+                }
+                else {
+                    self.closestObstacle = obstacles.min()
+                    if let closestObstacle = closestObstacle {
+                        if Date().timeIntervalSince(appStartTime) > 4{
+                            if voice == true{
+                                if meters == true{
+                                    AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
+                                }
+                                else {
+                                    AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
+                                }
                             }
                         }
                     }
