@@ -557,16 +557,20 @@ extension ARPlaneAnchor.Classification {
             switch self {
             case .wall:
                 return "wall"
+            case .floor:
+                return "floor"
+            case .ceiling:
+                return "ceiling"
             case .table:
                 return "table"
             case .seat:
-                return "chair"
+                return "seat"
             case .door:
                 return "door"
-            case .none(.unknown):
-                return "object"
+            case .window:
+                return "window"
             default:
-                return "other"
+                return "object"
             }
         }
 }
