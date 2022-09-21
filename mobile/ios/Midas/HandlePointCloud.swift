@@ -18,8 +18,19 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
     var isPointCloseToPlane: [Bool] = Array(repeating: false, count: threeDPoints.count)
     
     for plane in planes {
-        if plane.classification.description == "other"{
+        if plane.classification.description == "other" || plane.classification.description == "wall"{
             let cameraToPlaneTransform =  plane.transform.inverse * logFrame.pose
+            if plane.classification.description == "wall"{
+                let lambda = cameraToPlaneTransform.columns.3.y / cameraToPlaneTransform.columns.2.y
+                if lambda > 0{
+                    let intersectionX = cameraToPlaneTransform.columns.3.x + lambda * -cameraToPlaneTransform.columns.2.x
+                    let intersectionZ = cameraToPlaneTransform.columns.3.z + lambda * -cameraToPlaneTransform.columns.2.z
+                    if intersectionX >= plane.center.x - plane.extent.x/2, intersectionX <= plane.center.x + plane.extent.x/2, intersectionZ >= plane.center.z - plane.extent.z/2, intersectionZ <= plane.center.z + plane.extent.z/2 {
+                        AnnouncementManager.shared.announce(announcement: "wall")
+                        continue
+                    }
+                }
+            }
             let pointCloudInPlane = threeDPoints.map({ threeDPoint in cameraToPlaneTransform * simd_float4(threeDPoint, 1.0) })
             for (idx, p) in pointCloudInPlane.enumerated() {
                 if abs(p.y) < 0.2, p.x >= plane.center.x - plane.extent.x/2, p.x <= plane.center.x + plane.extent.x/2, p.z >= plane.center.z - plane.extent.z/2, p.z <= plane.center.z + plane.extent.z/2 {
@@ -36,15 +47,6 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
         if confidence[idx].rawValue == 2 && !isPointCloseToPlane[idx] {
             highConfidenceData.append(threeDPoint)
         }
-    }
-    print("highConfidenceData.count \(highConfidenceData.count)")
-    if highConfidenceData.count < 0 {
-        print("[")
-        for p in highConfidenceData {
-            print("[\(p.x), \(p.y), \(p.z)]")
-        }
-        print("]")
-        print("hello")
     }
     return highConfidenceData
 }

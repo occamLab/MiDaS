@@ -555,10 +555,12 @@ fileprivate enum ProcessingTimes: Int, CaseIterable {
 extension ARPlaneAnchor.Classification {
     var description: String {
             switch self {
+            case .wall:
+                return "wall"
             case .table:
                 return "table"
             case .seat:
-                return "seat"
+                return "chair"
             case .door:
                 return "door"
             case .none(.unknown):
