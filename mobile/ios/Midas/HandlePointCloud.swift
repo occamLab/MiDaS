@@ -18,15 +18,18 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
     var isPointCloseToPlane: [Bool] = Array(repeating: false, count: threeDPoints.count)
     
     for plane in planes {
-        if plane.classification.description == "other" || plane.classification.description == "wall"{
-            let cameraToPlaneTransform =  plane.transform.inverse * logFrame.pose
-            if plane.classification.description == "wall"{
+        // if the plane is not a table or seat
+        if !["table", "seat"].contains(plane.classification.description){
+            // transform camera coordinates to plane coordinates
+            let cameraToPlaneTransform = plane.transform.inverse * logFrame.pose
+            // if the plane is not a floor or ceiling, check its orientation to decide whether or not to filter it out
+            if !["floor", "ceiling"].contains(plane.classification.description){
                 let lambda = cameraToPlaneTransform.columns.3.y / cameraToPlaneTransform.columns.2.y
                 if lambda > 0{
                     let intersectionX = cameraToPlaneTransform.columns.3.x + lambda * -cameraToPlaneTransform.columns.2.x
                     let intersectionZ = cameraToPlaneTransform.columns.3.z + lambda * -cameraToPlaneTransform.columns.2.z
                     if intersectionX >= plane.center.x - plane.extent.x/2, intersectionX <= plane.center.x + plane.extent.x/2, intersectionZ >= plane.center.z - plane.extent.z/2, intersectionZ <= plane.center.z + plane.extent.z/2 {
-                        AnnouncementManager.shared.announce(announcement: "wall")
+                        AnnouncementManager.shared.announce(announcement: plane.classification.description)
                         continue
                     }
                 }
@@ -38,7 +41,8 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
                 }
             }
         }
-        else if plane.classification.description != "object"{
+        // if the plane is a table or seat
+        else{
             AnnouncementManager.shared.announce(announcement: plane.classification.description)
         }
     }
