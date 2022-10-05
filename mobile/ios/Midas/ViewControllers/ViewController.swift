@@ -57,6 +57,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: Storyboards Connections
     let appStartTime = Date()
     var saidFirstAnnouncement = false
+    var saidClutteredAnnouncement = false
     let calculateMIDAS = false
     let uploadData = false
     var meters = true
@@ -602,7 +603,13 @@ extension ViewController: ARSessionDelegate {
                 print("filtered point cloud size: \(filteredPointCloud.count)")
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
                 if obstacles.count > 3 {
-                    AnnouncementManager.shared.announce(announcement: "Warning. You are in a cluttered environment. Obstacle detection accuracy will be low.")
+                    if !saidClutteredAnnouncement{
+                        AnnouncementManager.shared.announce(announcement: "Warning. You are in a cluttered environment. Obstacle detection accuracy will be low.")
+                        saidClutteredAnnouncement = true
+                    }
+                    else{
+                        AnnouncementManager.shared.announce(announcement: "Warning. Cluttered environment.")
+                    }
                 }
                 else {
                     self.closestObstacle = obstacles.min()
