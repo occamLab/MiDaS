@@ -328,6 +328,34 @@ extension ViewController: CameraFeedManagerDelegate {
 
     present(alertController, animated: true, completion: nil)
   }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        // This visualization covers only detected planes.
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+
+        // Create a SceneKit plane to visualize the node using its position and extent.
+        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+        let planeNode = SCNNode(geometry: plane)
+        planeNode.position = SCNVector3Make(planeAnchor.center.x, 0, planeAnchor.center.z)
+
+        // SCNPlanes are vertically oriented in their local coordinate space.
+        // Rotate it to match the horizontal orientation of the ARPlaneAnchor.
+        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
+        planeNode.opacity = 0.4
+
+        // ARKit owns the node corresponding to the anchor, so make the plane a child node.
+        node.addChildNode(planeNode)
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        guard let planeNode = node.childNodes.first else {
+            return
+        }
+        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+        planeNode.geometry = plane
+        planeNode.position = SCNVector3Make(planeAnchor.center.x, 0, planeAnchor.center.z)
+    }
 
   @objc func runModel(on pixelBuffer: CVPixelBuffer)->[Float]? {
     guard let overlayViewFrame = overlayViewFrame, let previewViewFrame = previewViewFrame
