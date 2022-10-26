@@ -82,6 +82,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   @IBOutlet var feedbackLabel: UILabel!
   @IBOutlet var voiceButton: UIButton!
     
+  @IBOutlet weak var closestObjDistLabel: UILabel!
+    
   @IBOutlet weak var tableView: UITableView!
 
   @IBOutlet weak var threadCountLabel: UILabel!
@@ -641,6 +643,7 @@ extension ViewController: ARSessionDelegate {
                 else {
                     self.closestObstacle = obstacles.min()
                     if let closestObstacle = closestObstacle {
+                        closestObjDistLabel.text = String(closestObstacle)
                         if Date().timeIntervalSince(appStartTime) > 4{
                             if voice == true{
                                 if meters == true{
@@ -651,6 +654,9 @@ extension ViewController: ARSessionDelegate {
                                 }
                             }
                         }
+                    }
+                    else {
+                        closestObjDistLabel.text = "--"
                     }
                 }
             }

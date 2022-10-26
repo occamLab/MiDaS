@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -19,18 +21,27 @@
                                 <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tWv-pt-h17" userLabel="TopView">
-                                        <rect key="frame" x="0.0" y="0.0" width="390" height="119"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="390" height="122"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Distance" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FIV-b2-C3h">
+                                                <rect key="frame" x="35" y="73" width="67" height="21"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <color key="textColor" name="AccentColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </view>
                                     <view opaque="NO" contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="FLM-9o-o4W" customClass="OverlayView" customModule="Midas" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="119" width="390" height="390"/>
+                                        <rect key="frame" x="0.0" y="122" width="390" height="390"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="FLM-9o-o4W" secondAttribute="height" multiplier="1:1" id="1T9-Bs-Jec"/>
                                         </constraints>
                                         <edgeInsets key="layoutMargins" top="8" left="8" bottom="8" right="8"/>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nFg-A5-Dew" userLabel="BottomView">
-                                        <rect key="frame" x="0.0" y="509" width="390" height="335"/>
+                                        <rect key="frame" x="0.0" y="512" width="390" height="332"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" ambiguous="YES" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="cOj-2t-SbP" userLabel="Thread Stack View">
                                                 <rect key="frame" x="35" y="203" width="320" height="30"/>
@@ -126,6 +137,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="closestObjDistLabel" destination="FIV-b2-C3h" id="BjV-PK-aua"/>
                         <outlet property="feedbackLabel" destination="kKk-GB-WJu" id="Hdp-pl-wVe"/>
                         <outlet property="feetButton" destination="LqC-a7-icC" id="Wta-IK-eid"/>
                         <outlet property="hapticButton" destination="RmM-sR-fzz" id="eYY-jB-Npe"/>
@@ -141,4 +153,9 @@
             <point key="canvasLocation" x="135.38461538461539" y="137.91469194312796"/>
         </scene>
     </scenes>
+    <resources>
+        <namedColor name="AccentColor">
+            <color red="1" green="0.79199999570846558" blue="0.15700000524520874" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
 </document>
