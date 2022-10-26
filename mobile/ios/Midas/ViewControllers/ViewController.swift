@@ -341,8 +341,7 @@ extension ViewController: CameraFeedManagerDelegate {
         // SCNPlanes are vertically oriented in their local coordinate space.
         // Rotate it to match the horizontal orientation of the ARPlaneAnchor.
         planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
-        planeNode.opacity = 0.4
-
+        planeNode.opacity = 0.2
         // ARKit owns the node corresponding to the anchor, so make the plane a child node.
         node.addChildNode(planeNode)
     }
@@ -625,7 +624,7 @@ extension ViewController: ARSessionDelegate {
             print("getting the cloud")
             if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
                 let planes = frame.anchors.compactMap({ $0 as? ARPlaneAnchor })
-                let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame, planes: planes)
+                let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame, planes: planes, frameDimensions: frame.camera.imageResolution)
                 let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: truePointCloud)
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 print("filtered point cloud size: \(filteredPointCloud.count)")

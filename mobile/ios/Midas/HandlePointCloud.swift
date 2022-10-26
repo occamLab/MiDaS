@@ -10,7 +10,7 @@ import ARKit
 import ARDataLogger
 import MetricKit
 
-func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -> [simd_float3] {
+func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], frameDimensions: CGSize) -> [simd_float3] {
     let depthData = logFrame.depthData
     let confidence = logFrame.confData
     var highConfidenceData : [simd_float3] = []
@@ -18,22 +18,32 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
     var isPointCloseToPlane: [Bool] = Array(repeating: false, count: threeDPoints.count)
     
     for plane in planes {
-        // if the plane is not a table or seat
-        if !["table", "seat"].contains(plane.classification.description){
-            // transform camera coordinates to plane coordinates
-            let cameraToPlaneTransform = plane.transform.inverse * logFrame.pose
-            // if the plane is not a floor or ceiling, check its orientation to decide whether or not to filter it out
-            if !["floor", "ceiling"].contains(plane.classification.description){
-                let lambda = cameraToPlaneTransform.columns.3.y / cameraToPlaneTransform.columns.2.y
-                if lambda > 0{
-                    let intersectionX = cameraToPlaneTransform.columns.3.x + lambda * -cameraToPlaneTransform.columns.2.x
-                    let intersectionZ = cameraToPlaneTransform.columns.3.z + lambda * -cameraToPlaneTransform.columns.2.z
-                    if intersectionX >= plane.center.x - plane.extent.x/2, intersectionX <= plane.center.x + plane.extent.x/2, intersectionZ >= plane.center.z - plane.extent.z/2, intersectionZ <= plane.center.z + plane.extent.z/2 {
-                        AnnouncementManager.shared.announce(announcement: plane.classification.description)
-                        continue
-                    }
-                }
+        var announce = false
+        var filter = true
+        let cameraToPlaneTransform = plane.transform.inverse * logFrame.pose
+        if ["wall", "window", "door"].contains(plane.classification.description){
+            if rayIntersectsWithPlane(cameraToPlaneTransform: cameraToPlaneTransform, plane: plane){
+                announce = true
             }
+        }
+        else if ["table", "seat"].contains(plane.classification.description){
+            filter = false
+            if planeCornerInFrame(logFrame: logFrame, plane: plane, frameDimensions: frameDimensions){
+                announce = true
+            }
+        }
+        else if plane.classification.description == "object"{
+            filter = false
+        }
+        // else condition is if classification is floor or ceiling
+        // in this case, announce and filter keep their default values
+        
+        if announce{
+            AnnouncementManager.shared.announce(announcement: plane.classification.description)
+        }
+        
+        if filter{
+            // flag points to filter out
             let pointCloudInPlane = threeDPoints.map({ threeDPoint in cameraToPlaneTransform * simd_float4(threeDPoint, 1.0) })
             for (idx, p) in pointCloudInPlane.enumerated() {
                 if abs(p.y) < 0.2, p.x >= plane.center.x - plane.extent.x/2, p.x <= plane.center.x + plane.extent.x/2, p.z >= plane.center.z - plane.extent.z/2, p.z <= plane.center.z + plane.extent.z/2 {
@@ -41,18 +51,42 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor]) -
                 }
             }
         }
-        // if the plane is a table or seat
-        else{
-            AnnouncementManager.shared.announce(announcement: plane.classification.description)
-        }
     }
-    
+    //filter out points at the end
     for (idx, threeDPoint) in threeDPoints.enumerated() {
         if confidence[idx].rawValue == 2 && !isPointCloseToPlane[idx] {
             highConfidenceData.append(threeDPoint)
         }
     }
     return highConfidenceData
+}
+
+func rayIntersectsWithPlane(cameraToPlaneTransform: simd_float4x4, plane: ARPlaneAnchor) -> Bool {
+    let lambda = cameraToPlaneTransform.columns.3.y / cameraToPlaneTransform.columns.2.y
+    if lambda > 0{
+        let intersectionX = cameraToPlaneTransform.columns.3.x + lambda * -cameraToPlaneTransform.columns.2.x
+        let intersectionZ = cameraToPlaneTransform.columns.3.z + lambda * -cameraToPlaneTransform.columns.2.z
+        if intersectionX >= plane.center.x - plane.extent.x/2, intersectionX <= plane.center.x + plane.extent.x/2, intersectionZ >= plane.center.z - plane.extent.z/2, intersectionZ <= plane.center.z + plane.extent.z/2 {
+            return true
+        }
+    }
+    return false
+}
+
+func planeCornerInFrame(logFrame: ARFrameDataLog, plane:ARPlaneAnchor, frameDimensions:CGSize) -> Bool {
+    let corners = [simd_float4(plane.center.x + plane.extent.x/2, plane.center.y + plane.extent.y/2, plane.center.z, 1), simd_float4(plane.center.x - plane.extent.x/2, plane.center.y + plane.extent.y/2, plane.center.z, 1), simd_float4(plane.center.x + plane.extent.x/2, plane.center.y - plane.extent.y/2, plane.center.z, 1), simd_float4(plane.center.x - plane.extent.x/2, plane.center.y - plane.extent.y/2, plane.center.z, 1)]
+    let planeToCameraTransform = logFrame.pose.inverse * plane.transform
+    let cornersCameraCoordinates = corners.map{$0 * planeToCameraTransform}
+    for corner in cornersCameraCoordinates {
+        if corner.z < 0{
+            let pixelColumn = corner.x * logFrame.intrinsics[0][0] / corner.z + logFrame.intrinsics[0][2] + 0.5
+            let pixelRow = corner.y * logFrame.intrinsics[1][1] / corner.z + logFrame.intrinsics[1][2] + 0.5
+            if (pixelColumn >= 0 && pixelColumn <= Float(frameDimensions.width)) || (pixelRow >= 0 && pixelColumn <= Float(frameDimensions.height)){
+                return true
+            }
+        }
+    }
+    return false
 }
 
 func getGlobalPointCloud(logFrame: ARFrameDataLog, truePointCloud: [simd_float3]) -> [simd_float3] {
