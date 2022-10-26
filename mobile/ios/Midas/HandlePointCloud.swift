@@ -23,6 +23,7 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], f
         let cameraToPlaneTransform = plane.transform.inverse * logFrame.pose
         if ["wall", "window", "door"].contains(plane.classification.description){
             if rayIntersectsWithPlane(cameraToPlaneTransform: cameraToPlaneTransform, plane: plane){
+                filter = false
                 announce = true
             }
         }
