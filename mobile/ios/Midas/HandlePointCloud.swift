@@ -10,7 +10,8 @@ import ARKit
 import ARDataLogger
 import MetricKit
 
-func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], frameDimensions: CGSize) -> [simd_float3] {
+func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], frameDimensions: CGSize) -> ([simd_float3], [String]) {
+    var planesToAnnounce : [String] = []
     let depthData = logFrame.depthData
     let confidence = logFrame.confData
     var highConfidenceData : [simd_float3] = []
@@ -40,6 +41,7 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], f
         // in this case, announce and filter keep their default values
         
         if announce{
+            planesToAnnounce.append(plane.classification.description)
             AnnouncementManager.shared.announce(announcement: plane.classification.description)
         }
         
@@ -59,7 +61,7 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], f
             highConfidenceData.append(threeDPoint)
         }
     }
-    return highConfidenceData
+    return (highConfidenceData, planesToAnnounce)
 }
 
 func rayIntersectsWithPlane(cameraToPlaneTransform: simd_float4x4, plane: ARPlaneAnchor) -> Bool {
@@ -79,7 +81,7 @@ func planeCornerInFrame(logFrame: ARFrameDataLog, plane:ARPlaneAnchor, frameDime
     let planeToCameraTransform = logFrame.pose.inverse * plane.transform
     let cornersCameraCoordinates = corners.map{$0 * planeToCameraTransform}
     for corner in cornersCameraCoordinates {
-        if corner.z < 0{
+        if corner.z < 0 && corner.z >= -4{
             let pixelColumn = corner.x * logFrame.intrinsics[0][0] / corner.z + logFrame.intrinsics[0][2] + 0.5
             let pixelRow = corner.y * logFrame.intrinsics[1][1] / corner.z + logFrame.intrinsics[1][2] + 0.5
             if (pixelColumn >= 0 && pixelColumn <= Float(frameDimensions.width)) || (pixelRow >= 0 && pixelColumn <= Float(frameDimensions.height)){
@@ -136,4 +138,3 @@ func findObstacles(filteredPointCloud: [simd_float3]) -> [Float] {
     print(hist)
     return localMaxes
 }
-

@@ -83,6 +83,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
   @IBOutlet var voiceButton: UIButton!
     
   @IBOutlet weak var closestObjDistLabel: UILabel!
+  @IBOutlet weak var planeLabel: UILabel!
     
   @IBOutlet weak var tableView: UITableView!
 
@@ -626,12 +627,14 @@ extension ViewController: ARSessionDelegate {
             print("getting the cloud")
             if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
                 let planes = frame.anchors.compactMap({ $0 as? ARPlaneAnchor })
-                let truePointCloud = getTrueLidarPointCloud(logFrame: logFrame, planes: planes, frameDimensions: frame.camera.imageResolution)
-                let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: truePointCloud)
+                let extractedLidarData = getTrueLidarPointCloud(logFrame: logFrame, planes: planes, frameDimensions: frame.camera.imageResolution)
+                let planesToAnnounce = extractedLidarData.1
+                let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: extractedLidarData.0)
                 let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
                 print("filtered point cloud size: \(filteredPointCloud.count)")
+                planesToAnnounce.isEmpty ? (planeLabel.text = "--") : (planeLabel.text = planesToAnnounce.joined(separator: ", "))
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                if obstacles.count > 3 {
+                if obstacles.count > 5 {
                     if !saidClutteredAnnouncement{
                         AnnouncementManager.shared.announce(announcement: "Warning. You are in a cluttered environment. Obstacle detection accuracy will be low.")
                         saidClutteredAnnouncement = true
