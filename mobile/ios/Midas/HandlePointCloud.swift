@@ -30,7 +30,7 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], f
         }
         else if ["table", "seat"].contains(plane.classification.description){
             filter = false
-            if planeCornerInFrame(logFrame: logFrame, plane: plane, frameDimensions: frameDimensions){
+            if rayIntersectsWithPlane(cameraToPlaneTransform: cameraToPlaneTransform, plane: plane){
                 announce = true
             }
         }
@@ -71,22 +71,6 @@ func rayIntersectsWithPlane(cameraToPlaneTransform: simd_float4x4, plane: ARPlan
         let intersectionZ = cameraToPlaneTransform.columns.3.z + lambda * -cameraToPlaneTransform.columns.2.z
         if intersectionX >= plane.center.x - plane.extent.x/2, intersectionX <= plane.center.x + plane.extent.x/2, intersectionZ >= plane.center.z - plane.extent.z/2, intersectionZ <= plane.center.z + plane.extent.z/2 {
             return true
-        }
-    }
-    return false
-}
-
-func planeCornerInFrame(logFrame: ARFrameDataLog, plane:ARPlaneAnchor, frameDimensions:CGSize) -> Bool {
-    let corners = [simd_float4(plane.center.x + plane.extent.x/2, plane.center.y + plane.extent.y/2, plane.center.z, 1), simd_float4(plane.center.x - plane.extent.x/2, plane.center.y + plane.extent.y/2, plane.center.z, 1), simd_float4(plane.center.x + plane.extent.x/2, plane.center.y - plane.extent.y/2, plane.center.z, 1), simd_float4(plane.center.x - plane.extent.x/2, plane.center.y - plane.extent.y/2, plane.center.z, 1)]
-    let planeToCameraTransform = logFrame.pose.inverse * plane.transform
-    let cornersCameraCoordinates = corners.map{$0 * planeToCameraTransform}
-    for corner in cornersCameraCoordinates {
-        if corner.z < 0 && corner.z >= -4{
-            let pixelColumn = corner.x * logFrame.intrinsics[0][0] / corner.z + logFrame.intrinsics[0][2] + 0.5
-            let pixelRow = corner.y * logFrame.intrinsics[1][1] / corner.z + logFrame.intrinsics[1][2] + 0.5
-            if (pixelColumn >= 0 && pixelColumn <= Float(frameDimensions.width)) || (pixelRow >= 0 && pixelColumn <= Float(frameDimensions.height)){
-                return true
-            }
         }
     }
     return false

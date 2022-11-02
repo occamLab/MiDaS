@@ -58,6 +58,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let appStartTime = Date()
     var saidFirstAnnouncement = false
     var saidClutteredAnnouncement = false
+    var lastSaidClutteredAnnouncementTime = Date()
     let calculateMIDAS = false
     let uploadData = false
     var meters = true
@@ -634,20 +635,22 @@ extension ViewController: ARSessionDelegate {
                 print("filtered point cloud size: \(filteredPointCloud.count)")
                 planesToAnnounce.isEmpty ? (planeLabel.text = "--") : (planeLabel.text = planesToAnnounce.joined(separator: ", "))
                 let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                if obstacles.count > 5 {
+                if obstacles.count > 4 {
                     if !saidClutteredAnnouncement{
                         AnnouncementManager.shared.announce(announcement: "Warning. You are in a cluttered environment. Obstacle detection accuracy will be low.")
                         saidClutteredAnnouncement = true
+                        lastSaidClutteredAnnouncementTime = Date()
                     }
-                    else{
+                    else if -lastSaidClutteredAnnouncementTime.timeIntervalSinceNow > 10{
                         AnnouncementManager.shared.announce(announcement: "Warning. Cluttered environment.")
+                        lastSaidClutteredAnnouncementTime = Date()
                     }
                 }
                 else {
                     self.closestObstacle = obstacles.min()
                     if let closestObstacle = closestObstacle {
-                        closestObjDistLabel.text = String(closestObstacle)
-                        if Date().timeIntervalSince(appStartTime) > 4{
+                        closestObjDistLabel.text = String((round(closestObstacle * 10) / 10.0))
+                        if Date().timeIntervalSince(appStartTime) > 5{
                             if voice == true{
                                 if meters == true{
                                     AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
