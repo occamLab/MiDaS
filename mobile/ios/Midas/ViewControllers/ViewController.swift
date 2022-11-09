@@ -624,61 +624,69 @@ extension ViewController: ARSessionDelegate {
             }
             saidFirstAnnouncement = true
         }
-        if -lastFrameUploadTime.timeIntervalSinceNow > 0.75 {
-            print("getting the cloud")
-            if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
-                let planes = frame.anchors.compactMap({ $0 as? ARPlaneAnchor })
-                let extractedLidarData = getTrueLidarPointCloud(logFrame: logFrame, planes: planes, frameDimensions: frame.camera.imageResolution)
-                let planesToAnnounce = extractedLidarData.1
-                let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: extractedLidarData.0)
-                let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
-                print("filtered point cloud size: \(filteredPointCloud.count)")
-                planesToAnnounce.isEmpty ? (planeLabel.text = "--") : (planeLabel.text = planesToAnnounce.joined(separator: ", "))
-                let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
-                if obstacles.count > 4 {
-                    if !saidClutteredAnnouncement{
-                        AnnouncementManager.shared.announce(announcement: "Warning. You are in a cluttered environment. Obstacle detection accuracy will be low.")
-                        saidClutteredAnnouncement = true
-                        lastSaidClutteredAnnouncementTime = Date()
+        if -self.lastFrameUploadTime.timeIntervalSinceNow > 0.75 {
+            lastFrameUploadTime = Date()
+            DispatchQueue.global(qos: .userInitiated).async { [self] in
+                print("getting the cloud")
+                if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
+                    let planes = frame.anchors.compactMap({ $0 as? ARPlaneAnchor })
+                    let extractedLidarData = getTrueLidarPointCloud(logFrame: logFrame, planes: planes, frameDimensions: frame.camera.imageResolution)
+                    let planesToAnnounce = extractedLidarData.1
+                    let pointCloudGlobalFrame = getGlobalPointCloud(logFrame: logFrame, truePointCloud: extractedLidarData.0)
+                    let filteredPointCloud = isolateObstacles(logFrame: logFrame, yawAdjustedPointCloud: pointCloudGlobalFrame)
+                    print("filtered point cloud size: \(filteredPointCloud.count)")
+                    DispatchQueue.main.async {
+                        planesToAnnounce.isEmpty ? (self.planeLabel.text = "--") : (self.planeLabel.text = planesToAnnounce.joined(separator: ", "))
                     }
-                    else if -lastSaidClutteredAnnouncementTime.timeIntervalSinceNow > 10{
-                        AnnouncementManager.shared.announce(announcement: "Warning. Cluttered environment.")
-                        lastSaidClutteredAnnouncementTime = Date()
-                    }
-                }
-                else {
-                    self.closestObstacle = obstacles.min()
-                    if let closestObstacle = closestObstacle {
-                        closestObjDistLabel.text = String((round(closestObstacle * 10) / 10.0))
-                        if Date().timeIntervalSince(appStartTime) > 5{
-                            if voice == true{
-                                if meters == true{
-                                    AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
-                                }
-                                else {
-                                    AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
-                                }
-                            }
+                    let obstacles = findObstacles(filteredPointCloud:filteredPointCloud)
+                    if obstacles.count > 4 {
+                        if !self.saidClutteredAnnouncement{
+                            AnnouncementManager.shared.announce(announcement: "Warning. You are in a cluttered environment. Obstacle detection accuracy will be low.")
+                            self.saidClutteredAnnouncement = true
+                            self.lastSaidClutteredAnnouncementTime = Date()
+                        }
+                        else if -lastSaidClutteredAnnouncementTime.timeIntervalSinceNow > 10{
+                            AnnouncementManager.shared.announce(announcement: "Warning. Cluttered environment.")
+                            lastSaidClutteredAnnouncementTime = Date()
                         }
                     }
                     else {
-                        closestObjDistLabel.text = "--"
+                        self.closestObstacle = obstacles.min()
+                        if let closestObstacle = closestObstacle {
+                            DispatchQueue.main.async {
+                                closestObjDistLabel.text = String((round(closestObstacle * 10) / 10.0))
+                            }
+                            if Date().timeIntervalSince(appStartTime) > 5{
+                                if voice == true{
+                                    if meters == true{
+                                        AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
+                                    }
+                                    else {
+                                        AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            DispatchQueue.main.async {
+                                self.closestObjDistLabel.text = "--"
+                            }
+                        }
                     }
                 }
-            }
-            lastFrameUploadTime = Date()
-            if calculateMIDAS {
-                do {
-                    let convertedImage = try AECapturedTools(frame: frame)
-                    if let rgbBuffer = convertedImage.rgbPixel, let results = runModel(on: rgbBuffer) {
-                        print(CVPixelBufferGetPixelFormatName(pixelBuffer: rgbBuffer))
+                if calculateMIDAS {
+                    do {
+                        let convertedImage = try AECapturedTools(frame: frame)
+                        if let rgbBuffer = convertedImage.rgbPixel, let results = runModel(on: rgbBuffer) {
+                            print(CVPixelBufferGetPixelFormatName(pixelBuffer: rgbBuffer))
+                        }
+                    } catch {
+                        print("error converting image")
                     }
-                } catch {
-                    print("error converting image")
                 }
-            }
-            if uploadData {
-                ARDataLogger.ARLogger.shared.log(frame: frame, withType: "depth_benchmarking", withMeshLoggingBehavior: .none)
+                if uploadData {
+                    ARDataLogger.ARLogger.shared.log(frame: frame, withType: "depth_benchmarking", withMeshLoggingBehavior: .none)
+                }
             }
         }
     }
