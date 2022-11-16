@@ -625,7 +625,7 @@ extension ViewController: ARSessionDelegate {
             saidFirstAnnouncement = true
         }
         if -self.lastFrameUploadTime.timeIntervalSinceNow > 0.75 {
-            lastFrameUploadTime = Date()
+            self.lastFrameUploadTime = Date()
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 print("getting the cloud")
                 if let logFrame = ARDataLogger.ARLogger.shared.toLogFrame(frame: frame, type: "", meshLoggingBehavior: .none) {
@@ -651,19 +651,20 @@ extension ViewController: ARSessionDelegate {
                         }
                     }
                     else {
+                        var announcementString = planesToAnnounce.joined(separator: " ")
+                        print(lastFrameUploadTime)
+                        print("AString: " + announcementString)
                         self.closestObstacle = obstacles.min()
                         if let closestObstacle = closestObstacle {
                             DispatchQueue.main.async {
-                                closestObjDistLabel.text = String((round(closestObstacle * 10) / 10.0))
+                                self.closestObjDistLabel.text = String((round(closestObstacle * 10) / 10.0))
                             }
                             if Date().timeIntervalSince(appStartTime) > 5{
-                                if voice == true{
-                                    if meters == true{
-                                        AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10) / 10.0)")
-                                    }
-                                    else {
-                                        AnnouncementManager.shared.announce(announcement: "\(round(closestObstacle * 10 * 3.28) / 10.0)")
-                                    }
+                                if meters == true{
+                                    announcementString.append(" \(round(closestObstacle * 10) / 10.0)")
+                                }
+                                else {
+                                    announcementString.append(" \(round(closestObstacle * 10 * 3.28) / 10.0)")
                                 }
                             }
                         }
@@ -671,6 +672,9 @@ extension ViewController: ARSessionDelegate {
                             DispatchQueue.main.async {
                                 self.closestObjDistLabel.text = "--"
                             }
+                        }
+                        if voice == true {
+                            AnnouncementManager.shared.announce(announcement: announcementString)
                         }
                     }
                 }

@@ -42,7 +42,6 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], f
         
         if announce{
             planesToAnnounce.append(plane.classification.description)
-            AnnouncementManager.shared.announce(announcement: plane.classification.description)
         }
         
         if filter{
@@ -57,7 +56,7 @@ func getTrueLidarPointCloud(logFrame: ARFrameDataLog, planes: [ARPlaneAnchor], f
     }
     //filter out points at the end
     for (idx, threeDPoint) in threeDPoints.enumerated() {
-        if confidence[idx].rawValue == 2 && !isPointCloseToPlane[idx] {
+        if confidence[idx].rawValue > 0 && !isPointCloseToPlane[idx] {
             highConfidenceData.append(threeDPoint)
         }
     }

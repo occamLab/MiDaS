@@ -25,10 +25,14 @@ class AnnouncementManager {
     ///
     /// - Parameter announcement: the text to read to the user
     func announce(announcement: String) {
+        
       if UIAccessibility.isVoiceOverRunning {
           // use the VoiceOver API instead of text to speech
           UIAccessibility.post(notification: UIAccessibility.Notification.announcement, argument: announcement)
       } else {
+          if synth.isSpeaking {
+              return
+          }
           let audioSession = AVAudioSession.sharedInstance()
           do {
               try audioSession.setCategory(AVAudioSession.Category.playback)
